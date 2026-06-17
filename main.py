@@ -6,8 +6,8 @@ from threading import Thread
 from flask import Flask
 
 # 🔴 DIQQAT: O'ZINGNING MA'LUMOTLARINGNI SHU YERGA QO'Y
-TOKEN = 'BU_YERGA_YANGI_TOKEN_QOY'
-ADMIN_ID = 123456789  # O'zingning Telegram ID raqaming
+TOKEN = '8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU'
+ADMIN_ID = 8450078536  # O'zingning Telegram ID raqaming
 
 bot = telebot.TeleBot(TOKEN)
 
