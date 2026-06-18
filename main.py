@@ -4,13 +4,26 @@ from datetime import datetime
 import os
 from threading import Thread
 from flask import Flask
+import google.generativeai as genai
 
-# 🔴 DIQQAT: O'ZINGNING MA'LUMOTLARINGNI SHU YERGA QO'Y\
-# main.py faylining tepa qismi mana shunday toza bo'lishi shart:
+# --- ATROF-MUHIT O'ZGARUVCHILARI (XAVFSIZLIK) ---
+# Render yoki Mahalliy muhitdan kalitlarni o'qish
 BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
 GEMINI_API_KEY = os.environ.get("AQ.Ab8RN6LDoNqwBR2Q5s6NMxx7cuZsHgbv8cZwnlAsnb4ACxOPkw")
 
-bot = telebot.TeleBot(TOKEN)
+# Admin ID raqamingizni shu yerga kiriting (Masalan: 12345678)
+ADMIN_ID = 5604104253  # O'zingizning Telegram ID raqamingizni yozing
+
+# Gemini AI-ni sozlash
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-pro')
+else:
+    model = None
+    print("DIQQAT: GEMINI_API_KEY topilmadi!")
+
+# Botni ishga tushirish
+bot = telebot.TeleBot(BOT_TOKEN)
 
 # --- SERVER UCHUN KICHIK VEB-SAYT (KEEPALIVE) ---
 app = Flask('')
@@ -20,7 +33,6 @@ def home():
     return "Polygo Bot 24/7 rejimida muvaffaqiyatli ishlamoqda!"
 
 def run():
-    # Render avtomatik beradigan PORT bo'yicha ishga tushadi
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
@@ -31,15 +43,20 @@ def keep_alive():
 # --- BAZA BILAN ISHLASH ---
 def save_user(user_id):
     if not os.path.exists('users.txt'):
-        with open('users.txt', 'w') as f: f.write(f"{user_id}\n")
+        with open('users.txt', 'w') as f:
+            f.write(f"{user_id}\n")
         return
-    with open('users.txt', 'r') as f: users = f.read().splitlines()
+    with open('users.txt', 'r') as f:
+        users = f.read().splitlines()
     if str(user_id) not in users:
-        with open('users.txt', 'a') as f: f.write(f"{user_id}\n")
+        with open('users.txt', 'a') as f:
+            f.write(f"{user_id}\n")
 
 def get_users_count():
-    if not os.path.exists('users.txt'): return 0
-    with open('users.txt', 'r') as f: return len(f.read().splitlines())
+    if not os.path.exists('users.txt'):
+        return 0
+    with open('users.txt', 'r') as f:
+        return len(f.read().splitlines())
 
 def add_stars_to_stats(amount):
     current = 0
@@ -47,7 +64,8 @@ def add_stars_to_stats(amount):
         with open('stars.txt', 'r') as f:
             try: current = int(f.read().strip())
             except: current = 0
-    with open('stars.txt', 'w') as f: f.write(str(current + amount))
+    with open('stars.txt', 'w') as f:
+        f.write(str(current + amount))
 
 def get_total_stars():
     if os.path.exists('stars.txt'):
@@ -59,7 +77,7 @@ def get_total_stars():
 # --- MENYULAR ---
 def main_menu():
     markup = InlineKeyboardMarkup(row_width=2)
-    btn1 = InlineKeyboardButton("🚀 Muallif ni loyihalari", callback_data='projects')
+    btn1 = InlineKeyboardButton("🚀 Muallif loyihalari", callback_data='projects')
     btn2 = InlineKeyboardButton("⭐️ Loyihaga hissa qo'shish", callback_data='donate')
     btn3 = InlineKeyboardButton("📞 Admin bilan aloqa", callback_data='contact')
     btn4 = InlineKeyboardButton("🌐 Ijtimoiy tarmoqlar", callback_data='socials')
@@ -70,7 +88,7 @@ def main_menu():
 def admin_menu():
     markup = InlineKeyboardMarkup(row_width=1)
     btn1 = InlineKeyboardButton("📊 Bot Statistikasi", callback_data='admin_stats')
-    btn2 = InlineKeyboardButton("📢 Jami foydalanuvchilarga xabar yuborish", callback_data='admin_broadcast')
+    btn2 = InlineKeyboardButton("📢 Jami foydalanuvchilarga xabar", callback_data='admin_broadcast')
     btn3 = InlineKeyboardButton("🔙 Bosh menyuga qaytish", callback_data='back_to_main')
     markup.add(btn1, btn2, btn3)
     return markup
@@ -79,7 +97,7 @@ def admin_menu():
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     save_user(message.chat.id)
-    text = f"Salom, {message.from_user.first_name}!\n\nMen dasturchi Bilolning rasmiy botiman.\nQuyidagi menyu orqali kerakli bo'limni tanlang:"
+    text = f"Salom, {message.from_user.first_name}!\n\nMen dasturchi Bilolning sun'iy intellektga ega aqlli botiman.\nMenga istalgan savolingizni berishingiz mumkin!\n\nYoki quyidagi menyudan foydalaning:"
     bot.send_message(message.chat.id, text, reply_markup=main_menu())
 
 @bot.message_handler(commands=['admin'])
@@ -116,11 +134,12 @@ def callback_query(call):
 def process_broadcast(message):
     if message.chat.id != ADMIN_ID: return
     if not os.path.exists('users.txt'): return
-    with open('users.txt', 'r') as f: users = f.read().splitlines()
+    with open('users.txt', 'r') as f:
+        users = f.read().splitlines()
     for user_id in users:
         try: bot.send_message(int(user_id), message.text)
         except: continue
-    bot.send_message(ADMIN_ID, "✅ Xabar hamma foydalanuvchilarga tarqatildi!")
+    bot.send_message(ADMIN_ID, "✅ Xabar barcha foydalanuvchilarga tarqatildi!")
 
 def process_stars_amount(message):
     try:
@@ -140,13 +159,50 @@ def got_payment(message):
     stars_amount = message.successful_payment.total_amount
     add_stars_to_stats(stars_amount)
     current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    receipt_text = f"🧾 **POLYGO CHEK** 🧾\n━━━━━━━━━━━━━\n👤 **Hissa qo'shuvchi:** {message.from_user.first_name}\n⭐️ **Miyqdor:** {stars_amount} Stars\n📅 **Vaqt:** {current_time}\nStatus: ✅ Muvaffaqiyatli!"
+    receipt_text = f"🧾 **POLYGO CHEK** 🧾\n━━━━━━━━━━━━━\n👤 **Hissa qo'shuvchi:** {message.from_user.first_name}\n⭐️ **Miqdor:** {stars_amount} Stars\n📅 **Vaqt:** {current_time}\nStatus: ✅ Muvaffaqiyatli!"
     if os.path.exists('logo.png'):
-        with open('logo.png', 'rb') as photo: bot.send_photo(message.chat.id, photo, caption=receipt_text, parse_mode="Markdown")
+        with open('logo.png', 'rb') as photo:
+            bot.send_photo(message.chat.id, photo, caption=receipt_text, parse_mode="Markdown")
     else:
         bot.send_message(message.chat.id, receipt_text, parse_mode="Markdown")
 
+# --- GEMINI AI INTEGRATSIYASI (SAVOL-JAVOB) ---
+@bot.message_handler(func=lambda message: True)
+def handle_ai_chat(message):
+    save_user(message.chat.id)
+
+    if not model:
+        bot.reply_to(message, "❌ Tizimda Sun'iy Intellekt kaliti (GEMINI_API_KEY) o'rnatilmagan.")
+        return
+
+    # Foydalanuvchiga bot o'ylayotganini ko'rsatish
+    bot.send_chat_action(message.chat.id, 'typing')
+
+    try:
+        # Prompt muallif haqidagi qisqacha ma'lumotni o'z ichiga oladi
+        system_instruction = (
+            "Siz 14 yoshli yosh iqtidorli o'zbek dasturchisi Bilol (Bilolxon, muallif) tomonidan yaratilgan yordamchisiz. "
+            "Sizga foydalanuvchilar har xil savollar berishadi, ularga do'stona, aqlli va chiroyli o'zbek tilida javob bering. "
+            "Bilol haqida so'rashsa, u web-developer, video-editor va kiberxavfsizlikka qiziqishini, "
+            "EEW (Essential English Words) va Polygo (15 ta tilni bepul o'rgatuvchi yirik platforma) loyihalarini yaratayotganini ayting."
+        )
+
+        full_prompt = f"{system_instruction}\n\nFoydalanuvchi savoli: {message.text}"
+
+        # Sun'iy intellektdan javob olish
+        response = model.generate_content(full_prompt)
+
+        # Javobni foydalanuvchiga yuborish
+        bot.reply_to(message, response.text, parse_mode="Markdown")
+
+    except Exception as e:
+        # Markdown xatolarini oldini olish uchun oddiy matnda xatolik qaytarish
+        try:
+            bot.reply_to(message, response.text)
+        except:
+            bot.reply_to(message, "⚙️ Kechirasiz, javob tayyorlashda texnik xatolik yuz berdi. Qayta urinib ko'ring.")
+
 if __name__ == '__main__':
-    keep_alive() # Veb-sayt qismini ishga tushirish
-    print("Bot ishga tushdi...")
+    keep_alive() # Veb-sayt (keep-alive) qismini ishga tushirish
+    print("Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
