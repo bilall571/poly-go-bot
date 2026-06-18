@@ -5,9 +5,10 @@ import os
 from threading import Thread
 from flask import Flask
 
-# 🔴 DIQQAT: O'ZINGNING MA'LUMOTLARINGNI SHU YERGA QO'Y
-TOKEN = '8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU'
-ADMIN_ID = 8450078536  # O'zingning Telegram ID raqaming
+# 🔴 DIQQAT: O'ZINGNING MA'LUMOTLARINGNI SHU YERGA QO'Y\
+# main.py faylining tepa qismi mana shunday toza bo'lishi shart:
+BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
+GEMINI_API_KEY = os.environ.get("AQ.Ab8RN6LDoNqwBR2Q5s6NMxx7cuZsHgbv8cZwnlAsnb4ACxOPkw")
 
 bot = telebot.TeleBot(TOKEN)
 
