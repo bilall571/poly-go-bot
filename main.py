@@ -166,55 +166,36 @@ def got_payment(message):
     else:
         bot.send_message(message.chat.id, receipt_text, parse_mode="Markdown")
 
-# --- 9. GEMINI AI INTEGRATSIYASI (POLYGO AI v2.0.0) ---
-@bot.message_handler(func=lambda message: True)
+# --- 9. GEMINI AI INTEGRATSIYASI (To'g'rilangan) ---
+
+@bot.message_handler(content_types=['text'])
 def handle_ai_chat(message):
+    # 1. Matn borligini tekshiramiz
+    if not message.text:
+        return
+
     save_user(message.chat.id)
 
     if not model:
-        bot.reply_to(message, "⚙️ Hozircha AI tizimiga ulanib bo'lmayapti. Iltimos, keyinroq urinib ko'ring.")
+        bot.reply_to(message, "⚙️ AI tizimiga ulanib bo'lmayapti.")
         return
 
     bot.send_chat_action(message.chat.id, 'typing')
 
     try:
-        # Prompt: AI o'zini kim deb tanishtirishi kerak
         system_instruction = (
             "Siz 14 yoshli iqtidorli o'zbek dasturchisi Bilol (Bilolxon) tomonidan yaratilgan 'Polygo AI v2.0.0' aqlli yordamchisisiz. "
-            "Sizga foydalanuvchilar har xil savollar berishadi, ularga do'stona va o'zbek tilida javob bering. "
-            "Agar Bilol haqida so'rashsa, u web-developer, video-editor va kiberxavfsizlikka qiziqishini, "
-            "EEW va Polygo (15 ta tilni bepul o'rgatuvchi platforma) loyihalarini yaratayotganini ayting."
         )
         full_prompt = f"{system_instruction}\n\nFoydalanuvchi savoli: {message.text}"
 
         response = model.generate_content(full_prompt)
-
-        # Markdown xatosidan saqlanish uchun xavfsiz jo'natish
-        try:
-            bot.reply_to(message, response.text, parse_mode="Markdown")
-        except:
-            bot.reply_to(message, response.text)
+        bot.reply_to(message, response.text, parse_mode="Markdown")
 
     except Exception as e:
-        bot.reply_to(message, "⚠️ Kechirasiz, tarmoqda uzilish bo'ldi. Birozdan so'ng qayta yozing.")
+        print(f"API Xatoligi: {e}") # Xatoni logda ko'ramiz
+        bot.reply_to(message, "⚠️ Kechirasiz, tarmoqda uzilish bo'ldi.")
 
-# --- 10. BOTNI ISHGA TUSHIRISH ---
-if __name__ == '__main__':
-    keep_alive() # Veb-saytni uyg'otish
-    print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
-    bot.infinity_polling()
-
-@bot.message_handler(content_types=['text']) # Faqat matnli xabarlarni qabul qiladi
-def get_text_messages(message):
-    try:
-        if message.text:
-            response = model.generate_content(message.text)
-            bot.reply_to(message, response.text)
-    except Exception as e:
-        bot.reply_to(message, "Kechirasiz, javob olishda xatolik yuz berdi.")
-        print(f"Xatolik: {e}")
-
-# Agar matn bo'lmagan xabarlarni (stiker, rasm) ham inobatga olmoqchi bo'lsang:
-@bot.message_handler(content_types=['sticker', 'photo', 'document', 'audio', 'video'])
+# --- 10. MATN BO'LMAGAN XABARLAR (Stiker, Rasm, va h.k.) ---
+@bot.message_handler(content_types=['sticker', 'photo', 'document', 'audio', 'video', 'voice'])
 def handle_non_text(message):
-    bot.reply_to(message, "Men hozircha faqat matnli xabarlarga javob bera olaman.")
+    bot.reply_to(message, "Men hozircha faqat matnli xabarlarni tushuna olaman 🧠")
