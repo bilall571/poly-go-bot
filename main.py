@@ -204,13 +204,17 @@ if __name__ == '__main__':
     print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
 
-if not message.text:
-    bot.reply_to(message, "Iltimos, menga faqat matnli xabar yuboring!")
-    return
+@bot.message_handler(func=lambda message: True)
+def echo_all(message):
+    # 1. Avval xabar matnmi yoki yo'qligini tekshiramiz
+    if message.text is None:
+        bot.reply_to(message, "Kechirasiz, men faqat matnli xabarlarni tushunaman.")
+        return
 
-try:
-    response = model.generate_content(message.text) # yoki chat.send_message(message.text)
-    bot.reply_to(message, response.text)
-except Exception as e:
-    bot.reply_to(message, "Kechirasiz, javob qaytarishda texnik xatolik yuz berdi 😔")
-    print(f"XATOLIK: {e}")
+    # 2. Agar matn bo'lsa, davom etamiz
+    try:
+        response = model.generate_content(message.text)
+        bot.reply_to(message, response.text)
+    except Exception as e:
+        bot.reply_to(message, "Javob olishda muammo bo'ldi, birozdan keyin qayta urinib ko'ring.")
+        print(f"Xatolik yuz berdi: {e}")
