@@ -203,3 +203,14 @@ if __name__ == '__main__':
     keep_alive() # Veb-saytni uyg'otish
     print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
+
+if not message.text:
+    bot.reply_to(message, "Iltimos, menga faqat matnli xabar yuboring!")
+    return
+
+try:
+    response = model.generate_content(message.text) # yoki chat.send_message(message.text)
+    bot.reply_to(message, response.text)
+except Exception as e:
+    bot.reply_to(message, "Kechirasiz, javob qaytarishda texnik xatolik yuz berdi 😔")
+    print(f"XATOLIK: {e}")
