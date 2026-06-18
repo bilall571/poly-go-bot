@@ -166,35 +166,31 @@ def got_payment(message):
     else:
         bot.send_message(message.chat.id, receipt_text, parse_mode="Markdown")
 
-# --- 9. GEMINI AI INTEGRATSIYASI (To'g'rilangan) ---
+# --- 9. GEMINI AI INTEGRATSIYASI (To'g'rilangan v2.0.0) ---
 
-@bot.message_handler(content_types=['text'])
-def handle_ai_chat(message):
-    # 1. Matn borligini tekshiramiz
-    if not message.text:
-        return
+@bot.message_handler(func=lambda message: True)
+def handle_all_messages(message):
+    # 1. Matnli xabarlarni tekshirish va AIga yuborish
+    if message.content_type == 'text':
+        save_user(message.chat.id)
 
-    save_user(message.chat.id)
+        if not model:
+            bot.reply_to(message, "⚙️ AI tizimiga ulanib bo'lmayapti.")
+            return
 
-    if not model:
-        bot.reply_to(message, "⚙️ AI tizimiga ulanib bo'lmayapti.")
-        return
+        bot.send_chat_action(message.chat.id, 'typing')
+        try:
+            system_instruction = "Siz 14 yoshli dasturchi Bilolning loyihasi 'Polygo AI' yordamchisisiz."
+            full_prompt = f"{system_instruction}\n\nFoydalanuvchi: {message.text}"
+            response = model.generate_content(full_prompt)
+            bot.reply_to(message, response.text, parse_mode="Markdown")
+        except Exception as e:
+            bot.reply_to(message, "⚠️ Kechirasiz, tarmoqda uzilish bo'ldi.")
+            print(f"Xatolik: {e}")
 
-    bot.send_chat_action(message.chat.id, 'typing')
-
-    try:
-        system_instruction = (
-            "Siz 14 yoshli iqtidorli o'zbek dasturchisi Bilol (Bilolxon) tomonidan yaratilgan 'Polygo AI v2.0.0' aqlli yordamchisisiz. "
-        )
-        full_prompt = f"{system_instruction}\n\nFoydalanuvchi savoli: {message.text}"
-
-        response = model.generate_content(full_prompt)
-        bot.reply_to(message, response.text, parse_mode="Markdown")
-
-    except Exception as e:
-        print(f"API Xatoligi: {e}") # Xatoni logda ko'ramiz
-        bot.reply_to(message, "⚠️ Kechirasiz, tarmoqda uzilish bo'ldi.")
-
+    # 2. Matn bo'lmagan xabarlarni (rasm, stiker) nazorat qilish
+    else:
+        bot.reply_to(message, "Men hozircha faqat matnli xabarlarni tushuna olaman 🧠")
 # --- 10. MATN BO'LMAGAN XABARLAR (Stiker, Rasm, va h.k.) ---
 @bot.message_handler(content_types=['sticker', 'photo', 'document', 'audio', 'video', 'voice'])
 def handle_non_text(message):
