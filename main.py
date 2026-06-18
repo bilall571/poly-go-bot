@@ -6,9 +6,9 @@ from threading import Thread
 from flask import Flask
 import google.generativeai as genai
 
-# --- 1. XAVFSIZ KALITLAR (Render'dan olinadi) ---
-BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
-GEMINI_API_KEY = os.environ.get("AQ.Ab8RN6LDoNqwBR2Q5s6NMxx7cuZsHgbv8cZwnlAsnb4ACxOPkw")
+# --- 1. XAVFSIZ KALITLAR (To'g'ridan-to'g'ri yozilgan holati) ---
+BOT_TOKEN = "8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU"
+GEMINI_API_KEY = "AQ.Ab8RN6LDoNqwBR2Q5s6NMxx7cuZsHgbv8cZwnlAsnb4ACxOPkw"
 ADMIN_ID = 5604104253  # Sening maxsus ID raqaming
 
 # --- 2. SUN'IY INTELLEKTNI SOZLASH ---
