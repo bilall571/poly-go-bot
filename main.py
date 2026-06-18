@@ -204,17 +204,17 @@ if __name__ == '__main__':
     print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
 
-@bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    # 1. Avval xabar matnmi yoki yo'qligini tekshiramiz
-    if message.text is None:
-        bot.reply_to(message, "Kechirasiz, men faqat matnli xabarlarni tushunaman.")
-        return
-
-    # 2. Agar matn bo'lsa, davom etamiz
+@bot.message_handler(content_types=['text']) # Faqat matnli xabarlarni qabul qiladi
+def get_text_messages(message):
     try:
-        response = model.generate_content(message.text)
-        bot.reply_to(message, response.text)
+        if message.text:
+            response = model.generate_content(message.text)
+            bot.reply_to(message, response.text)
     except Exception as e:
-        bot.reply_to(message, "Javob olishda muammo bo'ldi, birozdan keyin qayta urinib ko'ring.")
-        print(f"Xatolik yuz berdi: {e}")
+        bot.reply_to(message, "Kechirasiz, javob olishda xatolik yuz berdi.")
+        print(f"Xatolik: {e}")
+
+# Agar matn bo'lmagan xabarlarni (stiker, rasm) ham inobatga olmoqchi bo'lsang:
+@bot.message_handler(content_types=['sticker', 'photo', 'document', 'audio', 'video'])
+def handle_non_text(message):
+    bot.reply_to(message, "Men hozircha faqat matnli xabarlarga javob bera olaman.")
