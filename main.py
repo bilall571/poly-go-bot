@@ -160,3 +160,13 @@ if __name__ == '__main__':
     keep_alive()
     print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
+
+
+
+# Process the response
+        try: # <--- MANA SHU SO'Z YETISHMAYAPTI
+            bot.reply_to(message, response.text, parse_mode="Markdown")
+
+        except Exception as e: # <--- Endi bu yerdagi qizil chiziq yo'qoladi!
+            bot.reply_to(message, "Kechirasiz, xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.")
+            print(f"Xatolik: {e}")
