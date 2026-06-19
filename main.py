@@ -7,7 +7,7 @@ from flask import Flask
 
 # --- 1. XAVFSIZ KALITLAR ---
 # Bu yerda kod Renderda bo'lsa "BOT_TOKEN" dan oladi, o'zingni kompyuteringda bo'lsa to'g'ridan-to'g'ri ishlaydi
-BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU", "8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
+BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
 ADMIN_ID = 8450078536  # Sening maxsus ID raqaming
 
 bot = telebot.TeleBot(BOT_TOKEN)
