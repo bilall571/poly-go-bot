@@ -6,7 +6,8 @@ from threading import Thread
 from flask import Flask
 
 # --- 1. XAVFSIZ KALITLAR ---
-BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
+# Bu yerda kod Renderda bo'lsa "BOT_TOKEN" dan oladi, o'zingni kompyuteringda bo'lsa to'g'ridan-to'g'ri ishlaydi
+BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU", "8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
 ADMIN_ID = 8450078536  # Sening maxsus ID raqaming
 
 bot = telebot.TeleBot(BOT_TOKEN)
@@ -160,12 +161,3 @@ if __name__ == '__main__':
     keep_alive()
     print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
-
-
-# To'g'ri tekislash namunasi:
-    response = chat.send_message(message.text) # 👈 Bu qator qaysi chegaradan boshlansa...
-
-    try:                                       # 👈 try ham aynan o'sha chiziqdan boshlanishi shart!
-bot.reply_to(message, response.text, parse_mode="Markdown") # ichkarida
-    except Exception as e:                     # 👈 except ham o'sha tashqi chiziqda!
-bot.reply_to(message, "Xatolik yuz berdi.") # ichkarida
