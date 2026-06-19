@@ -161,12 +161,14 @@ if __name__ == '__main__':
     print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
     bot.infinity_polling()
 
+# ... tepadagi kodlaring ...
+        response = chat.send_message(message.text)
 
-
-# Process the response
-        try: # <--- MANA SHU SO'Z YETISHMAYAPTI
+        try:
+            # Bu qator o'ngga surilgan bo'lishi kerak!
             bot.reply_to(message, response.text, parse_mode="Markdown")
 
-        except Exception as e: # <--- Endi bu yerdagi qizil chiziq yo'qoladi!
+        except Exception as e:
+            # Bu qatorlar ham except dan ichkarida bo'lishi kerak!
             bot.reply_to(message, "Kechirasiz, xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.")
-            print(f"Xatolik: {e}")
+            print(f"Xatolik yuz berdi: {e}")
