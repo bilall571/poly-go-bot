@@ -17,7 +17,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "Polygo Bot 24/7 rejimida muvaffaqiyatli ishlamoqda!"
+    return "Polygo Bot 24/7 rejimida muvaffaqiyatli ishlamoqda.!"
 
 def run():
     port = int(os.environ.get("PORT", 8080))
