@@ -4,25 +4,14 @@ from datetime import datetime
 import os
 from threading import Thread
 from flask import Flask
-import google.generativeai as genai
 
-# --- 1. XAVFSIZ KALITLAR (To'g'ridan-to'g'ri yozilgan holati) ---
-BOT_TOKEN = "8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU"
-GEMINI_API_KEY = "AQ.Ab8RN6LDoNqwBR2Q5s6NMxx7cuZsHgbv8cZwnlAsnb4ACxOPkw"
-ADMIN_ID = 5604104253  # Sening maxsus ID raqaming
+# --- 1. XAVFSIZ KALITLAR ---
+BOT_TOKEN = os.environ.get("8890786241:AAE4LGeObJnCNRpgpsKVRCd__WScgYW2wfU")
+ADMIN_ID = 8450078536  # Sening maxsus ID raqaming
 
-# --- 2. SUN'IY INTELLEKTNI SOZLASH ---
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
-    # Eng yangi va xatosiz ishlaydigan model
-    model = genai.GenerativeModel('gemini-1.5-flash')
-else:
-    model = None
-
-# Botni yaratish
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# --- 3. SERVER UCHUN VEB-SAYT (24/7 ishlashi uchun) ---
+# --- 2. SERVER UCHUN VEB-SAYT (24/7 ishlashi uchun) ---
 app = Flask('')
 
 @app.route('/')
@@ -37,7 +26,7 @@ def keep_alive():
     t = Thread(target=run)
     t.start()
 
-# --- 4. BAZA VA STATISTIKA ---
+# --- 3. BAZA VA STATISTIKA ---
 def save_user(user_id):
     if not os.path.exists('users.txt'):
         with open('users.txt', 'w') as f: f.write(f"{user_id}\n")
@@ -65,7 +54,7 @@ def get_total_stars():
             except: return 0
     return 0
 
-# --- 5. MENYULAR ---
+# --- 4. MENYULAR ---
 def main_menu():
     markup = InlineKeyboardMarkup(row_width=2)
     btn1 = InlineKeyboardButton("🚀 Muallif loyihalari", callback_data='projects')
@@ -84,13 +73,13 @@ def admin_menu():
     markup.add(btn1, btn2, btn3)
     return markup
 
-# --- 6. ASOSIY BUYRUQLAR (/start va /admin) ---
+# --- 5. ASOSIY BUYRUQLAR ---
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     save_user(message.chat.id)
     text = (f"Salom, {message.from_user.first_name}!\n\n"
-            f"Men dasturchi Bilolning sun'iy intellektga ega rasmiy botiman.\n"
-            f"Menga istalgan savolingizni yozishingiz yoki quyidagi menyudan foydalanishingiz mumkin 👇")
+            f"Men dasturchi Bilolning rasmiy botiman.\n"
+            f"Quyidagi menyu orqali kerakli bo'limni tanlang 👇")
     bot.send_message(message.chat.id, text, reply_markup=main_menu())
 
 @bot.message_handler(commands=['admin'])
@@ -100,7 +89,7 @@ def open_admin_panel(message):
     else:
         bot.send_message(message.chat.id, "❌ Bu bo'lim faqat bot asoschisi uchun!")
 
-# --- 7. TUGMALARNI BOSHQARISH (CALLBACK) ---
+# --- 6. TUGMALARNI BOSHQARISH (CALLBACK) ---
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     if call.data == 'admin_stats':
@@ -130,7 +119,7 @@ def callback_query(call):
         msg = bot.send_message(call.message.chat.id, "Nechta yulduz (Stars ⭐️) yubormoqchisiz?\nFaqat raqam yozing:")
         bot.register_next_step_handler(msg, process_stars_amount)
 
-# --- 8. XABAR TARQATISH VA TO'LOV TIZIMI ---
+# --- 7. XABAR TARQATISH VA TO'LOV TIZIMI ---
 def process_broadcast(message):
     if message.chat.id != ADMIN_ID: return
     if not os.path.exists('users.txt'): return
@@ -166,32 +155,8 @@ def got_payment(message):
     else:
         bot.send_message(message.chat.id, receipt_text, parse_mode="Markdown")
 
-# --- 9. GEMINI AI INTEGRATSIYASI (To'g'rilangan v2.0.0) ---
-
-@bot.message_handler(func=lambda message: True)
-def handle_all_messages(message):
-    # 1. Matnli xabarlarni tekshirish va AIga yuborish
-    if message.content_type == 'text':
-        save_user(message.chat.id)
-
-        if not model:
-            bot.reply_to(message, "⚙️ AI tizimiga ulanib bo'lmayapti.")
-            return
-
-        bot.send_chat_action(message.chat.id, 'typing')
-        try:
-            system_instruction = "Siz 14 yoshli dasturchi Bilolning loyihasi 'Polygo AI' yordamchisisiz."
-            full_prompt = f"{system_instruction}\n\nFoydalanuvchi: {message.text}"
-            response = model.generate_content(full_prompt)
-            bot.reply_to(message, response.text, parse_mode="Markdown")
-        except Exception as e:
-            bot.reply_to(message, "⚠️ Kechirasiz, tarmoqda uzilish bo'ldi.")
-            print(f"Xatolik: {e}")
-
-    # 2. Matn bo'lmagan xabarlarni (rasm, stiker) nazorat qilish
-    else:
-        bot.reply_to(message, "Men hozircha faqat matnli xabarlarni tushuna olaman 🧠")
-# --- 10. MATN BO'LMAGAN XABARLAR (Stiker, Rasm, va h.k.) ---
-@bot.message_handler(content_types=['sticker', 'photo', 'document', 'audio', 'video', 'voice'])
-def handle_non_text(message):
-    bot.reply_to(message, "Men hozircha faqat matnli xabarlarni tushuna olaman 🧠")
+# --- 8. BOTNI ISHGA TUSHIRISH ---
+if __name__ == '__main__':
+    keep_alive()
+    print("🚀 Polygo Bot muvaffaqiyatli ishga tushdi...")
+    bot.infinity_polling()
